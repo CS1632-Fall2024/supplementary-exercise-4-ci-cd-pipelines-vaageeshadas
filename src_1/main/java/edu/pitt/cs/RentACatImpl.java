@@ -41,13 +41,13 @@ public class RentACatImpl implements RentACat {
 	 * @param id the ID of the cat to rent
 	 * @return true if cat exists and was not rented out, false otherwise
 	 */
-	// System output is "Sorry, Old Deuteronomy is not here!" + newline
+
 	public boolean rentCat(int id) {
 		Cat c = getCat(id);
 		if(c == null){
 			System.out.println("Invalid cat ID.");
 			return false;
-		}		
+		}
 		if(c.getRented() == false){
 			c.rentCat();
 			System.out.println(c.getName() + " has been rented.");
@@ -86,14 +86,19 @@ public class RentACatImpl implements RentACat {
 	 */
 
 	public String listCats() {
-		String rentableCats = "";
+		String ret = "";
 
-		for(int i = 0; i < cats.size(); i++){
-			if(cats.get(i).getRented() == false){
-				rentableCats += cats.get(i).toString() +"\n"; 
+		for(Cat c:cats){
+			if(c.getRented() == false){
+				ret += "ID ";
+				ret += c.getId();
+				ret += ". ";
+				ret += c.getName();
+				ret += "\n";
 			}
+			
 		}
-		return rentableCats;
+		return ret;
 	}
 
 	/**

@@ -7,14 +7,14 @@ import org.junit.FixMethodOrder;
 import org.junit.runners.MethodSorters;
 import static org.junit.Assert.*;
 
-import org.mockito.Mockito;
-import static org.mockito.Mockito.*;
+// import org.mockito.Mockito;
+// import static org.mockito.Mockito.*;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.lang.reflect.Method;
+
+import java.lang.reflect.*;
+
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class RentACatIntegrationTest {
@@ -39,43 +39,35 @@ public class RentACatIntegrationTest {
 	@Before
 	public void setUp() throws Exception {
 		// INITIALIZE THE TEST FIXTURE
+
 		// 1. Create a new RentACat object and assign to r using a call to RentACat.createInstance(InstanceType).
 		// Passing InstanceType.IMPL as the first parameter will create a real RentACat object using your RentACatImpl implementation.
 		// Passing InstanceType.MOCK as the first parameter will create a mock RentACat object using Mockito.
 		// Which type is the correct choice for this integration test?  I'll leave it up to you.  The answer is in the Unit Testing Part 2 lecture. :)
-		// TODO: Fill in
 		r = RentACat.createInstance(InstanceType.IMPL);
-
 		// 2. Create a Cat with ID 1 and name "Jennyanydots", assign to c1 using a call to Cat.createInstance(InstanceType, int, String).
 		// Passing InstanceType.IMPL as the first parameter will create a real cat using your CatImpl implementation.
 		// Passing InstanceType.MOCK as the first parameter will create a mock cat using Mockito.
 		// Which type is the correct choice for this integration test?  Again, I'll leave it up to you.
-		// TODO: Fill in
-		c1 = Cat.createInstance(InstanceType.IMPL,1,"Jennyanydots");
-		
-
+		c1 = Cat.createInstance(InstanceType.IMPL, 1, "Jennyanydots");
 		// 3. Create a Cat with ID 2 and name "Old Deuteronomy", assign to c2 using a call to Cat.createInstance(InstanceType, int, String).
-		// TODO: Fill in
-		c2 = Cat.createInstance(InstanceType.IMPL,2,"Old Deuteronomy");
-
+		c2 = Cat.createInstance(InstanceType.IMPL, 2, "Old Deuteronomy");
 		// 4. Create a Cat with ID 3 and name "Mistoffelees", assign to c3 using a call to Cat.createInstance(InstanceType, int, String).
-		// TODO: Fill in
-		c3 = Cat.createInstance(InstanceType.IMPL,3,"Mistoffelees");
-
+		c3 = Cat.createInstance(InstanceType.IMPL, 3, "Mistoffelees");
 		// 5. Redirect system output from stdout to the "out" stream
 		// First, make a back up of System.out (which is the stdout to the console)
+		out = new ByteArrayOutputStream();
 		stdout = System.out;
 		// Second, update System.out to the PrintStream created from "out"
-		// TODO: Fill in.  Refer to the textbook chapter 14.6 on Testing System Output.
-		out = new ByteArrayOutputStream();
 		System.setOut(new PrintStream(out));
+
 	}
 
 	@After
 	public void tearDown() throws Exception {
 		// Restore System.out to the original stdout
 		System.setOut(stdout);
-
+		out.reset();
 		// Not necessary strictly speaking since the references will be overwritten in
 		// the next setUp call anyway and Java has automatic garbage collection.
 		r = null;
@@ -98,23 +90,27 @@ public class RentACatIntegrationTest {
 	 * method. efer to the Unit Testing Part 1 lecture and the textbook appendix 
 	 * hapter on using reflection on how to do this.  Please use r.getClass() to get
 	 * the class object of r instead of hardcoding it as RentACatImpl.
- * @throws SecurityException 
-	 * @throws NoSuchMethodException 
-	 * @throws InvocationTargetException 
-	 * @throws IllegalArgumentException 
-	 * @throws IllegalAccessException 
 	 */
 	@Test
-	public void testGetCatNullNumCats0() throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		Method m = r.getClass().getDeclaredMethod("getCat", int.class);
-		m.setAccessible(true); 
-		Cat result = (Cat) m.invoke(r,2);
-		assertEquals(null,result);
-
+	public void testGetCatNullNumCats0() {
+		try{
+			// Preconditions
+			// r = null;
+			
+			// Execution
+			Method m =  r.getClass().getDeclaredMethod("getCat", int.class);
+			m.setAccessible(true);
+			Object ret = m.invoke(r, 2);
+			
+			// Postconditions
+			assertNull(ret);
+		}
+		
+    	catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+			fail("Exception occurred during reflection operation: " + e.getMessage());
+		}
 	}
 
- 
- 
 
 	/**
 	 * Test case for Cat getCat(int id).
@@ -130,24 +126,33 @@ public class RentACatIntegrationTest {
 	 * method. efer to the Unit Testing Part 1 lecture and the textbook appendix 
 	 * hapter on using reflection on how to do this.  Please use r.getClass() to get
 	 * the class object of r instead of hardcoding it as RentACatImpl.
-	 * @throws SecurityException 
-	 * @throws NoSuchMethodException 
-	 * @throws InvocationTargetException 
-	 * @throws IllegalArgumentException 
-	 * @throws IllegalAccessException 
 	 */
 	@Test
-	public void testGetCatNumCats3() throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		r.addCat(c1);
-		r.addCat(c2);
-		r.addCat(c3);
+	public void testGetCatNumCats3() {
+		try{
+			// Preconditions
+			r.addCat(c1);
+			r.addCat(c2);
+			r.addCat(c3);
 
-		Method m = r.getClass().getDeclaredMethod("getCat", int.class);
-		m.setAccessible(true); 
-		Cat result = (Cat) m.invoke(r,2);
-		int answer = result.getId();
-		assertEquals(2, answer);
+			// Execution
+			Method m = r.getClass().getDeclaredMethod("getCat", int.class);
+			m.setAccessible(true);
+			Object ret = m.invoke(r, 2);
 
+			// Postcondition
+			assertNotNull(ret);
+			Cat retCat = (Cat) ret;
+			int retCatId = retCat.getId();
+
+
+			assertEquals(2, retCatId);
+
+		}
+
+		catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+			fail("Exception occurred during reflection operation: " + e.getMessage());
+		}
 	}
 
 	/**
@@ -160,9 +165,15 @@ public class RentACatIntegrationTest {
 	 * </pre>
 	 */
 	@Test
-	public void testListCatsNumCats0() {		
-		String cats = r.listCats();
-		assertEquals( "", cats);
+	public void testListCatsNumCats0() {
+		// Preconditions
+
+
+		// Execution
+		String ret = r.listCats();
+
+		// Postconditions
+		assertEquals("", ret);
 	}
 
 	/**
@@ -177,14 +188,21 @@ public class RentACatIntegrationTest {
 	 */
 	@Test
 	public void testListCatsNumCats3() {
+
+		// Preconditions
 		r.addCat(c1);
 		r.addCat(c2);
 		r.addCat(c3);
 
-		String listCats = r.listCats();
-		assertEquals( "ID 1. Jennyanydots\nID 2. Old Deuteronomy\nID 3. Mistoffelees\n", listCats);
+		// Execution
+		String ret = r.listCats();
+
+		// Postconditions
+		String expectedStr = "ID 1. Jennyanydots\nID 2. Old Deuteronomy\nID 3. Mistoffelees\n";
+		assertEquals(expectedStr, ret);
+
 	}
-  
+
 	/**
 	 * Test case for boolean renameCat(int id, String name).
 	 * 
@@ -195,17 +213,19 @@ public class RentACatIntegrationTest {
 	 *                 c2 is not renamed to "Garfield".
 	 *                 System output is "Invalid cat ID." + newline.
 	 * </pre>
-	 * @throws SecurityException 
-	 * @throws NoSuchMethodException 
-	 * @throws InvocationTargetException 
-	 * @throws IllegalArgumentException 
-	 * @throws IllegalAccessException 
 	 */
 	@Test
-	public void testRenameFailureNumCats0() throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		boolean answer = r.renameCat(2, "Garfield");
-		assertFalse(answer);
+	public void testRenameFailureNumCats0() {
+
+		// Preconditions
+
+		// Execution
+		boolean ret = r.renameCat(2, "Garfield");
+
+		// Postconditions
+		assertFalse(ret);
 		assertEquals("Invalid cat ID." + newline, out.toString());
+
 	}
 
 	/**
@@ -220,15 +240,18 @@ public class RentACatIntegrationTest {
 	 */
 	@Test
 	public void testRenameNumCat3() {
+
+		// Preconditions
 		r.addCat(c1);
 		r.addCat(c2);
 		r.addCat(c3);
 
-		boolean returnValue = r.renameCat(2, "Garfield");
-		assertEquals(true,returnValue);
-		String name = c2.getName();
-		assertEquals("Garfield", name);
+		// Execution
+		boolean ret = r.renameCat(2, "Garfield");
 
+		// Postconditions
+		assertTrue(ret);
+		assertEquals("Garfield", c2.getName());
 	}
 
 	/**
@@ -244,12 +267,20 @@ public class RentACatIntegrationTest {
 	 */
 	@Test
 	public void testRentCatNumCats3() {
+
+		// Preconditions
 		r.addCat(c1);
 		r.addCat(c2);
 		r.addCat(c3);
-		boolean answer = r.rentCat(2);
 
-		assertTrue(answer);
+		out.reset();
+
+		// Execution
+		boolean ret = r.rentCat(2);
+
+		// Postconditions
+		assertTrue(ret);
+		assertEquals(true, c2.getRented());
 		assertEquals("Old Deuteronomy has been rented." + newline, out.toString());
 	}
 
@@ -267,18 +298,21 @@ public class RentACatIntegrationTest {
 	 */
 	@Test
 	public void testRentCatFailureNumCats3() {
+		
+		// Preconditions
 		r.addCat(c1);
 		r.addCat(c2);
 		r.addCat(c3);
-		out.reset();
 		c2.rentCat();
 
-		boolean answer = r.rentCat(2);
+		out.reset();
+		// Execution
+		boolean ret = r.rentCat(2);
 
-		assertFalse(answer);
+		// Postconditions
+		assertFalse(ret);
+		assertEquals(true, c2.getRented());
 		assertEquals("Sorry, Old Deuteronomy is not here!" + newline, out.toString());
-
-
 	}
 
 	/**
@@ -295,14 +329,22 @@ public class RentACatIntegrationTest {
 	 */
 	@Test
 	public void testReturnCatNumCats3() {
+		
+		// Preconditions
 		r.addCat(c1);
 		r.addCat(c2);
 		r.addCat(c3);
 		c2.rentCat();
-		boolean answer = r.returnCat(2);
-		assertTrue(answer);
-		assertEquals("Welcome back, Old Deuteronomy!" + newline, out.toString());
 
+		out.reset();
+		
+		// Execution
+		boolean ret = r.returnCat(2);
+
+		// Postconditions
+		assertTrue(ret);
+		assertFalse(c2.getRented());
+		assertEquals("Welcome back, Old Deuteronomy!" + newline, out.toString());
 	}
 
 	/**
@@ -318,15 +360,18 @@ public class RentACatIntegrationTest {
 	 */
 	@Test
 	public void testReturnFailureCatNumCats3() {
+		// Preconditions
 		r.addCat(c1);
 		r.addCat(c2);
 		r.addCat(c3);
-		boolean answer = r.returnCat(2);
-		assertFalse(answer);
 
-		String desiredResult = "Old Deuteronomy is already here!" + "\n";
-		assertEquals(desiredResult, out.toString());
+		// Execution
+		boolean ret = r.returnCat(2);
 
+		// Postconditions
+		assertFalse(ret);
+		assertFalse(c2.getRented());
+		assertEquals("Old Deuteronomy is already here!" + newline, out.toString());
 	}
 
 }
